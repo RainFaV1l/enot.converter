@@ -1,0 +1,60 @@
+services:
+  nginx:
+    image: nginx:latest
+    volumes:
+        - ./:/var/www/
+        - ./_docker/nginx/conf.d/:/etc/nginx/conf.d/
+    ports:
+      - "8080:80"
+    depends_on:
+        - app
+        - db
+    container_name: app_nginx
+    networks:
+        - laravel
+  app:
+      build:
+          context: ./php
+          dockerfile: _docker/app/Dockerfile
+      volumes:
+          - ./:/var/www
+      depends_on:
+          - db
+      container_name: app
+      networks:
+          - laravel
+      ports:
+          - 9000:9000
+  db:
+      image: mysql:latest
+      restart: unless-stopped
+      tty: true
+      volumes:
+          - ./tmp/db:/var/lib/mysql
+      environment:
+          MYSQL_DATABASE: converterapp
+          MYSQL_USER: test
+          MYSQL_PASSWORD: test
+          MYSQL_ROOT_PASSWORD: root
+      ports:
+          - 3306:3306
+#      command:
+#          - mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
+      container_name: app_db
+      networks:
+          - laravel
+  phpmyadmin:
+      image: phpmyadmin/phpmyadmin
+      environment:
+          MYSQL_ROOT_PASSWORD: root
+          PMA_HOST: db
+      depends_on:
+          - db
+      ports:
+          - 3400:80
+      container_name: app_pa
+      networks:
+          - laravel
+networks:
+  laravel:
+      driver: bridge
