@@ -13,11 +13,7 @@ Route::controller(AuthController::class)->middleware(['throttle:api'])->prefix('
     Route::get('/user', 'user');
 });
 
-Route::controller(CurrencyController::class)->middleware(['throttle:api', 'auth:api'])->prefix('currencies')->group(function () {
-    Route::get('/', 'index');
-    Route::get('/{id}', 'show');
-});
-
-Route::controller(ConvertController::class)->middleware(['throttle:api', 'auth:api'])->prefix('convert')->group(function () {
-    Route::post('/', 'index');
+Route::middleware(['throttle:api', 'auth:api'])->group(function () {
+    Route::resource('currencies',CurrencyController::class);
+    Route::resource('convert',ConvertController::class);
 });

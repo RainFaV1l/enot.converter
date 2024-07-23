@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\ConvertRequest;
 use App\Http\Resources\V1\CurrencyCollection;
 use App\Repositories\Interfaces\CurrencyRepositoryInterface;
+use Illuminate\Http\JsonResponse;
 
 class ConvertController extends Controller
 {
@@ -17,7 +18,7 @@ class ConvertController extends Controller
         $this->currencyRepository = $currencyRepository;
     }
 
-    public function index(ConvertRequest $request)
+    public function store(ConvertRequest $request)
     {
         $data = $request->validated();
 
@@ -34,5 +35,22 @@ class ConvertController extends Controller
         $convertedAmount = $data['amount'] * $conversionRate;
 
         return response()->json(['amount' => $convertedAmount]);
+    }
+
+    public function storeTest($data)
+    {
+        $from = $this->currencyRepository->getCurrencyById($data['from']);
+
+        $to = $this->currencyRepository->getCurrencyById($data['to']);
+
+        $fromRate = str_replace(',', '.', $from['VunitRate']);
+
+        $toRate = (float) str_replace(',', '.', $to['VunitRate']);
+
+        $conversionRate = $fromRate / $toRate ;
+
+        $convertedAmount = $data['amount'] * $conversionRate;
+
+        return new JsonResponse(['amount' => $convertedAmount]);
     }
 }
